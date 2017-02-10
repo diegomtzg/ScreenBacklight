@@ -39,16 +39,15 @@ void draw()
   
   //get screenshot into object "screenshot" of class BufferedImage
   BufferedImage screenshot = robby.createScreenCapture(new Rectangle(new Dimension(WIDTH, HEIGHT)));
-  //1368*928 is the screen resolution
+
   
   
   int i=0;
   int j=0;
-  //1368*928
-  //I skip every alternate pixel making my program 4 times faster
-  for(i =0;i<WIDTH/PRECISION; i=i+1)
-  {
-    for(j=0; j<HEIGHT/PRECISION;j=j+1)
+
+ for(i =0;i<WIDTH; i=i+2) //skipping pixels makes program exponentially faster
+ {
+    for(j=0; j<HEIGHT;j=j+2)
     {
       pixel = screenshot.getRGB(i,j); //the ARGB integer has the colors of pixel (i,j)
       r = r+(int)(255&(pixel>>16)); //add up reds
@@ -57,16 +56,6 @@ void draw()
     }
   }
   
-  for(i = (WIDTH/PRECISION)*(PRECISION - 1); i<WIDTH; i = i+1)
-  {
-    for(j= (HEIGHT/PRECISION)*(PRECISION - 1); j<HEIGHT; j = j+1)
-    {
-      pixel = screenshot.getRGB(i,j); //the ARGB integer has the colors of pixel (i,j)
-      r = r+(int)(255&(pixel>>16)); //add up reds
-      g = g+(int)(255&(pixel>>8)); //add up greens
-      b = b+(int)(255&(pixel)); //add up blues
-    }
-  }
   r = r/((WIDTH/2)*(HEIGHT/2)); //average red (skipping every alternate pixel)
   g = g/((WIDTH/2)*(HEIGHT/2)); //average green
   b = b/((WIDTH/2)*(HEIGHT/2)); //average blue
