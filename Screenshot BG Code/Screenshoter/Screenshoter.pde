@@ -39,8 +39,6 @@ void draw()
   
   //get screenshot into object "screenshot" of class BufferedImage
   BufferedImage screenshot = robby.createScreenCapture(new Rectangle(new Dimension(WIDTH, HEIGHT)));
-
-  
   
   int i=0;
   int j=0;

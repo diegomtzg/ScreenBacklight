@@ -1,6 +1,6 @@
-#define BLUEPIN 9
+#define GREENPIN 9
 #define REDPIN 10
-#define GREENPIN 11
+#define BLUEPIN 11
 
 int red, green, blue;
 
