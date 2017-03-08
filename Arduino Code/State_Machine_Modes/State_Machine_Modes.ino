@@ -240,24 +240,6 @@ void mode2()
         analogWrite(BLUEPIN, 255 - 2*X);
       }
     }
-//    if(Y > 250) // Red zone
-//    {
-//      analogWrite(REDPIN, 255);
-//      analogWrite(BLUEPIN, X);
-//      analogWrite(GREENPIN, 0);
-//    }
-//    else if(X < 120) // blue zone
-//    {
-//      analogWrite(BLUEPIN, 255);
-//      analogWrite(REDPIN, X);
-//      analogWrite(GREENPIN, Y);
-//    }
-//    else if(X > 135) // green zone
-//    {
-//      analogWrite(BLUEPIN, X);
-//      analogWrite(REDPIN, Y);
-//      analogWrite(GREENPIN, 255);
-//    }
     
     Serial.print(X);
     Serial.print("     ");
