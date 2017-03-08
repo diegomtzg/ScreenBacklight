@@ -30,15 +30,7 @@ void loop()
   }
   else if(state == 2)
   {
-    red();
-  }
-  else if(state == 3)
-  {
-    green();
-  }
-  else if(state == 4)
-  {
-    blue();
+    mode2();
   }
 }
 
@@ -89,6 +81,7 @@ void mode0()
     //protocol expects data in format of 4 bytes
     //(xff) as a marker to ensure proper synchronization always
     //followed by red, green, blue bytes
+    digitalWrite(LED_BUILTIN, HIGH);
     if (Serial.available()>=4) {
       if(Serial.read() == 0xff){
         red = Serial.read();
@@ -168,42 +161,107 @@ void mode1()
   exitfunction: state++;
 }
 
-void red()
+void mode2()
 {
+  float scale = 255.0/1024;
+  int xpin = A1;    // select the input pin for the potentiometer
+  int ypin = A0;
+  int pushpin = 13;
+  pinMode(xpin, INPUT);
+  pinMode(ypin, INPUT);
+  pinMode(pushpin, INPUT);
+  
+  int X = 0; 
+  int Y = 0;
+  int Z = 0;
+  
   while(buttonIsPressed() != true)
   {
     lcd.setCursor(0, 0);
-    lcd.print("3:    Red");
-    analogWrite(REDPIN, 255);
-    analogWrite(GREENPIN, 0);
-    analogWrite(BLUEPIN, 0);
-  }
-  state++;
-}
+    lcd.print("3: Joystick");
+    X = analogRead(ypin);
+    Y = analogRead(xpin);
+    Z = digitalRead(pushpin);
+  
+    X = ((float) X * scale);
+    Y = ((float) Y * scale);
+    Z = ((float) Z * scale);
 
-void green()
-{
-  while(buttonIsPressed() != true)
-  {
-    lcd.setCursor(0, 0);
-    lcd.print("4:    Green");
-    analogWrite(GREENPIN, 255);
-    analogWrite(REDPIN, 0);
-    analogWrite(BLUEPIN, 0);
-  }
-  state++;
-}
+    lcd.setCursor(0, 1);
+    lcd.print("X:");
+    lcd.print(X);
+    lcd.print("  Y:");
+    lcd.print(Y);
+    delay(10);
+    lcd.clear();
 
-void blue()
-{
-  while(buttonIsPressed() != true)
-  {
-    lcd.setCursor(0, 0);
-    lcd.print("5:    Blue");
-    analogWrite(BLUEPIN, 255);
-    analogWrite(REDPIN, 0);
-    analogWrite(GREENPIN, 0);
+    if(X < 10) // magenta to blue
+    {
+        analogWrite(REDPIN, Y);
+        analogWrite(GREENPIN, 0);
+        analogWrite(BLUEPIN, 255);
+    }
+    else if(Y < 10) // bottom third of wheel
+    {
+      if(X < 125) // from blue to cyan
+      {
+        analogWrite(REDPIN, 0);
+        analogWrite(GREENPIN, 2*X);
+        analogWrite(BLUEPIN, 255);
+      }
+      else // from cyan to green
+      {
+        analogWrite(REDPIN, 0);
+        analogWrite(GREENPIN, 255);
+        analogWrite(BLUEPIN, 255 - X);
+      }
+    }
+    else if(X > 245) // left third of wheel
+    {
+      if(Y < 255) // from magenta to blue
+      {
+        analogWrite(REDPIN, Y);
+        analogWrite(GREENPIN, 255);
+        analogWrite(BLUEPIN, 0);
+      }
+    }
+    else if(Y > 245) // top third
+    {
+      if(X > 119) // right half of top third
+      {
+        analogWrite(REDPIN, 255);
+        analogWrite(GREENPIN, (X - 120)*2);   
+        analogWrite(BLUEPIN, 0);
+      }
+      else
+      {
+        analogWrite(REDPIN, 255);
+        analogWrite(GREENPIN, 0);
+        analogWrite(BLUEPIN, 255 - 2*X);
+      }
+    }
+//    if(Y > 250) // Red zone
+//    {
+//      analogWrite(REDPIN, 255);
+//      analogWrite(BLUEPIN, X);
+//      analogWrite(GREENPIN, 0);
+//    }
+//    else if(X < 120) // blue zone
+//    {
+//      analogWrite(BLUEPIN, 255);
+//      analogWrite(REDPIN, X);
+//      analogWrite(GREENPIN, Y);
+//    }
+//    else if(X > 135) // green zone
+//    {
+//      analogWrite(BLUEPIN, X);
+//      analogWrite(REDPIN, Y);
+//      analogWrite(GREENPIN, 255);
+//    }
+    
+    Serial.print(X);
+    Serial.print("     ");
+    Serial.println(Y);
   }
   state = 0;
 }
-
