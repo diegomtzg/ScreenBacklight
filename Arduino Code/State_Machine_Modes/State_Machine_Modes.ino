@@ -10,9 +10,9 @@
 LiquidCrystal lcd(3, 4, 5, 6, 7, 8);
 
 int state = 0;
-float red = 255;
-float blue = 255;
-float green = 255;
+int red = 0;
+int blue = 0;
+int green = 0;
 
 void setup() 
 {
@@ -57,32 +57,88 @@ bool buttonIsPressed(int buttonPin) //pressed but not held
     return false;
 }
 
+bool checkSignal()
+{
+      //TODO: EXIT OUT OF THESE LOOPS WHEN BUTTON IS PRESSED
+      
+      if(Serial.available() == 0) // not connected to computer
+      { 
+        lcd.setCursor(0, 1);
+        lcd.print("No signal");
+        int timer = 6;
+        while(timer >= 0)
+        {
+          lcd.print(".");
+          timer--;
+          if(buttonIsPressed(PUSHBUTTON_PIN))
+          {
+            return false;
+          }
+          delay(1000);
+          
+          if(Serial.available() != 0) 
+          {
+            lcd.clear();
+            lcd.print("Signal found");
+            lcd.setCursor(0,1);
+            lcd.print("Connecting");
+            for(int i = 0; i < 3; i++)
+            {
+              lcd.print(".");
+              delay(1000);
+            }
+            return true;
+          }
+        }
+        
+        if(Serial.available() == 0) // if still not connected, move to next state
+        {
+          lcd.clear();
+          lcd.setCursor(0,0);
+          lcd.print("NO SIGNAL FOUND:");
+          lcd.setCursor(0,1);
+          lcd.print("CHANGING MODE");
+          for(int i = 0; i < 4; i++)
+          {
+            lcd.print(".");
+            delay(1000);
+          }
+          return false;
+      }
+    }
+    else
+      return true;
+}
+
 void mode0()
 {
-  while(!buttonIsPressed(PUSHBUTTON_PIN))
-  { 
     lcd.setCursor(0, 0);
-    lcd.print("1:  Computer");
-    lcd.setCursor(3, 1);
-    lcd.print("BG Lighting");
+    lcd.print("1: BG Lighting");
 
+    if(checkSignal() == false)
+      goto nextstate1;
+
+    lcd.clear();
+    while(!buttonIsPressed(PUSHBUTTON_PIN))
+    { 
+    lcd.setCursor(0, 0);
+    lcd.print("1: BG Lighting");
     //protocol expects data in format of 4 bytes
     //(xff) as a marker to ensure proper synchronization always
     //followed by red, green, blue bytes
-    digitalWrite(LED_BUILTIN, HIGH);
-    if (Serial.available()>=4) {
+    if (Serial.available() >= 4) {
       if(Serial.read() == 0xff){
         red = Serial.read();
         green= Serial.read();
         blue = Serial.read();
       }
     }
-    //finally control led brightness through pulse-width modulation
+    // finally control led brightness through pulse-width modulation
     analogWrite(REDPIN, red);
     analogWrite(GREENPIN, green);
     analogWrite(BLUEPIN, blue);
   }
-  state++;
+  nextstate1: state++;
 }
 
 void mode1()
@@ -90,6 +146,7 @@ void mode1()
   int FADESPEED = 5;
   while(!buttonIsPressed(PUSHBUTTON_PIN))
   {
+    lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("2:   Color");
     lcd.setCursor(5, 1);
