@@ -2,21 +2,23 @@
 #define GREENPIN 11
 #define REDPIN 10
 #define BLUEPIN 9
-#define BUTTONPIN 2
+#define PUSHBUTTON_PIN 2
+#define JOYSTICK_BUTTON_PIN 13
 #define PRESS_LENGTH 1
 
 // initialize the LCD library with the numbers of the interface pins
 LiquidCrystal lcd(3, 4, 5, 6, 7, 8);
 
 int state = 0;
-int red = 255;
-int blue = 255;
-int green = 255;
+float red = 255;
+float blue = 255;
+float green = 255;
 
 void setup() 
 {
   lcd.begin(16, 2);
-  pinMode(BUTTONPIN, INPUT);
+  pinMode(PUSHBUTTON_PIN, INPUT);
+  pinMode(JOYSTICK_BUTTON_PIN, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
 }
@@ -37,10 +39,10 @@ void loop()
   }
 }
 
-bool buttonIsPressed() //pressed but not held
+bool buttonIsPressed(int buttonPin) //pressed but not held
 {
   int buttonPress = 0;
-  while (digitalRead(BUTTONPIN) == HIGH){
+  while (digitalRead(buttonPin) == HIGH){
    digitalWrite(LED_BUILTIN, HIGH);
    buttonPress++; 
    delay(50);
@@ -55,25 +57,10 @@ bool buttonIsPressed() //pressed but not held
     return false;
 }
 
-bool buttonIsHeld()
-{
-  int buttonPress = 0;
-  while (digitalRead(BUTTONPIN) == HIGH){
-   digitalWrite(LED_BUILTIN, HIGH);
-   buttonPress++; 
-   delay(50);
-  }
-  digitalWrite(LED_BUILTIN, LOW);
-  if(buttonPress > PRESS_LENGTH + 20) // 10 = 1 second
-  {
-    return true;
-  }
-}
-
 void mode0()
 {
-  while(buttonIsPressed() != true)
-  {
+  while(!buttonIsPressed(PUSHBUTTON_PIN))
+  { 
     lcd.setCursor(0, 0);
     lcd.print("1:  Computer");
     lcd.setCursor(3, 1);
@@ -101,7 +88,7 @@ void mode0()
 void mode1()
 {
   int FADESPEED = 5;
-  while(buttonIsPressed() != true)
+  while(!buttonIsPressed(PUSHBUTTON_PIN))
   {
     lcd.setCursor(0, 0);
     lcd.print("2:   Color");
@@ -112,7 +99,7 @@ void mode1()
       int b = 0;
        //fade from blue to violet
       for (r = 0; r < 256; r++) { 
-        if(buttonIsPressed() == true)
+        if(buttonIsPressed(PUSHBUTTON_PIN))
           goto exitfunction;
           
         analogWrite(REDPIN, r);
@@ -120,7 +107,7 @@ void mode1()
       } 
        //fade from violet to red
       for (b = 255; b > 0; b--) { 
-        if(buttonIsPressed() == true)
+        if(buttonIsPressed(PUSHBUTTON_PIN))
           goto exitfunction;
           
         analogWrite(BLUEPIN, b);
@@ -128,7 +115,7 @@ void mode1()
       } 
       // fade from red to yellow
       for (g = 0; g < 256; g++) { 
-        if(buttonIsPressed() == true)
+        if(buttonIsPressed(PUSHBUTTON_PIN))
           goto exitfunction;
           
         analogWrite(GREENPIN, g);
@@ -136,7 +123,7 @@ void mode1()
       } 
       // fade from yellow to green
       for (r = 255; r > 0; r--) { 
-        if(buttonIsPressed() == true)
+        if(buttonIsPressed(PUSHBUTTON_PIN))
           goto exitfunction;
           
         analogWrite(REDPIN, r);
@@ -144,7 +131,7 @@ void mode1()
       } 
       // fade from green to teal
       for (b = 0; b < 256; b++) { 
-        if(buttonIsPressed() == true)
+        if(buttonIsPressed(PUSHBUTTON_PIN))
           goto exitfunction;
           
         analogWrite(BLUEPIN, b);
@@ -152,7 +139,7 @@ void mode1()
       } 
       // fade from teal to blue
       for (g = 255; g > 0; g--) { 
-        if(buttonIsPressed() == true)
+        if(buttonIsPressed(PUSHBUTTON_PIN))
           goto exitfunction;
           
         analogWrite(GREENPIN, g);
@@ -176,7 +163,7 @@ void mode2()
   int Y = 0;
   int Z = 0;
   
-  while(buttonIsPressed() != true)
+  while(!buttonIsPressed(PUSHBUTTON_PIN))
   {
     lcd.setCursor(0, 0);
     lcd.print("3: Joystick");
@@ -186,8 +173,64 @@ void mode2()
   
     X = ((float) X * scale);
     Y = ((float) Y * scale);
-    Z = !Z;
+    Z = !Z; // Joystick switch is asserted when not pushed
 
+    if(Z) {
+        analogWrite(REDPIN, 0);
+        analogWrite(GREENPIN, 0);
+        analogWrite(BLUEPIN, 0);
+    }
+    else {
+      if(X < 10) // magenta to blue
+      {
+          analogWrite(REDPIN, Y);
+          analogWrite(GREENPIN, 0);
+          analogWrite(BLUEPIN, 255);
+      }
+      else if(Y < 10) // bottom third of wheel
+      {
+        if(X < 125) // from blue to cyan
+        {
+          analogWrite(REDPIN, 0);
+          analogWrite(GREENPIN, 2*X);
+          analogWrite(BLUEPIN, 255);
+        }
+        else // from cyan to green
+        {
+          analogWrite(REDPIN, 0);
+          analogWrite(GREENPIN, 255);
+          analogWrite(BLUEPIN, 255 - X);
+        }
+      }
+      else if(X > 245) // left third of wheel
+      {
+        if(Y < 255) // from magenta to blue
+        {
+          analogWrite(REDPIN, Y);
+          analogWrite(GREENPIN, 255);
+          analogWrite(BLUEPIN, 0);
+        }
+      }
+      else if(Y > 245) // top third
+      {
+        if(X > 119) // right half of top third
+        {
+          analogWrite(REDPIN, 255);
+          analogWrite(GREENPIN, (X - 120)*2);   
+          analogWrite(BLUEPIN, 0);
+        }
+        else
+        {
+          analogWrite(REDPIN, 255);
+          analogWrite(GREENPIN, 0);
+          analogWrite(BLUEPIN, 255 - 2*X);
+        }
+      }
+    } 
+    
+    Serial.print(X);
+    Serial.print("     ");
+    Serial.println(Y);
     lcd.setCursor(0, 1);
     lcd.print("X:");
     lcd.print(X);
@@ -197,56 +240,6 @@ void mode2()
     lcd.print(Z);
     delay(10);
     lcd.clear();
-
-    if(X < 10) // magenta to blue
-    {
-        analogWrite(REDPIN, Y);
-        analogWrite(GREENPIN, 0);
-        analogWrite(BLUEPIN, 255);
-    }
-    else if(Y < 10) // bottom third of wheel
-    {
-      if(X < 125) // from blue to cyan
-      {
-        analogWrite(REDPIN, 0);
-        analogWrite(GREENPIN, 2*X);
-        analogWrite(BLUEPIN, 255);
-      }
-      else // from cyan to green
-      {
-        analogWrite(REDPIN, 0);
-        analogWrite(GREENPIN, 255);
-        analogWrite(BLUEPIN, 255 - X);
-      }
-    }
-    else if(X > 245) // left third of wheel
-    {
-      if(Y < 255) // from magenta to blue
-      {
-        analogWrite(REDPIN, Y);
-        analogWrite(GREENPIN, 255);
-        analogWrite(BLUEPIN, 0);
-      }
-    }
-    else if(Y > 245) // top third
-    {
-      if(X > 119) // right half of top third
-      {
-        analogWrite(REDPIN, 255);
-        analogWrite(GREENPIN, (X - 120)*2);   
-        analogWrite(BLUEPIN, 0);
-      }
-      else
-      {
-        analogWrite(REDPIN, 255);
-        analogWrite(GREENPIN, 0);
-        analogWrite(BLUEPIN, 255 - 2*X);
-      }
-    }
-    
-    Serial.print(X);
-    Serial.print("     ");
-    Serial.println(Y);
-  }
+  } 
   state = 0;
 }
