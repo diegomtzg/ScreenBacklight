@@ -9,6 +9,9 @@
 LiquidCrystal lcd(3, 4, 5, 6, 7, 8);
 
 int state = 0;
+int red = 255;
+int blue = 255;
+int green = 255;
 
 void setup() 
 {
@@ -75,9 +78,7 @@ void mode0()
     lcd.print("1:  Computer");
     lcd.setCursor(3, 1);
     lcd.print("BG Lighting");
-    int red = 255;
-    int blue = 255;
-    int green = 255;
+
     //protocol expects data in format of 4 bytes
     //(xff) as a marker to ensure proper synchronization always
     //followed by red, green, blue bytes
@@ -185,13 +186,15 @@ void mode2()
   
     X = ((float) X * scale);
     Y = ((float) Y * scale);
-    Z = ((float) Z * scale);
+    Z = !Z;
 
     lcd.setCursor(0, 1);
     lcd.print("X:");
     lcd.print(X);
-    lcd.print("  Y:");
+    lcd.print(" Y:");
     lcd.print(Y);
+    lcd.print(" Z:");
+    lcd.print(Z);
     delay(10);
     lcd.clear();
 
