@@ -95,9 +95,9 @@ bool checkSignal()
         {
           lcd.clear();
           lcd.setCursor(0,0);
-          lcd.print("NO SIGNAL FOUND:");
+          lcd.print("No signal found:");
           lcd.setCursor(0,1);
-          lcd.print("CHANGING MODE");
+          lcd.print("Changing mode");
           for(int i = 0; i < 4; i++)
           {
             lcd.print(".");
