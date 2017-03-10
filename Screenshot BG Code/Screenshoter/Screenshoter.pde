@@ -1,23 +1,50 @@
-import java.awt.Robot; //java library that lets us take screenshots
+import java.awt.Robot; //<>//
 import java.awt.AWTException;
 import java.awt.event.InputEvent;
+import java.awt.image.DataBufferInt;
 import java.awt.image.BufferedImage;
 import java.awt.Rectangle;
 import java.awt.Dimension;
-import processing.serial.*; //library for serial communication
+import processing.serial.*;
 
-Serial port; //creates object "port" of serial class
-Robot robby; //creates object "robby" of robot class
+Serial port; // Creates object "port" of serial class
+Robot robby; // Creates object "robby" of robot class
 
-int PRECISION = 5; // lower this to make more precise and less efficient
-int WIDTH = 1368; // screen width in pixels
-int HEIGHT = 928; // screen height in pixels
+final int WIDTH = 1368; // Screen width in pixels
+final int HEIGHT = 928; // Screen height in pixels
+
+// We only need to create these objects once
+Dimension dim = new Dimension(WIDTH, HEIGHT);
+Rectangle rec = new Rectangle(dim);
+BufferedImage screenshot;
+
+// Some calculations we only need once
+int area = WIDTH * HEIGHT;
 
 void setup()
 {
-  String portName = Serial.list()[1];
-  port = new Serial(this, portName, 9600); //set baud rate
-  size(100, 100); //window size (doesn't matter)
+  // Exit as this is a fatal error
+  String[] list = Serial.list();
+  if(list.length <= 0) {
+    println("Failed to receive a serial port"); 
+    exit();
+  }
+  String portName; 
+  for(int i = 0; i < list.length; i++) {
+    try {
+      portName = list[i];
+      port = new Serial(this, portName, 9600); // Set baud rate
+      if(port != null) {
+        break;
+      }
+    }
+    catch (Throwable err) {
+      println("Error opening port");
+      exit();
+    }
+  }
+  
+  size(100, 100); // Sindow size (doesn't matter)
   try 
   {
     robby = new Robot();
@@ -31,38 +58,31 @@ void setup()
 
 void draw()
 {
-  int pixel; //ARGB variable with 32 int bytes where
-  //sets of 8 bytes are: Alpha, Red, Green, Blue
-  float r=0;
-  float g=0;
-  float b=0;
-  
-  //get screenshot into object "screenshot" of class BufferedImage
-  BufferedImage screenshot = robby.createScreenCapture(new Rectangle(new Dimension(WIDTH, HEIGHT)));
-  
-  int i=0;
-  int j=0;
+  // Capture the screen image (Buffered Image object)
+  screenshot = robby.createScreenCapture(rec);
 
- for(i =0;i<WIDTH; i=i+2) //skipping pixels makes program exponentially faster
- {
-    for(j=0; j<HEIGHT;j=j+2)
-    {
-      pixel = screenshot.getRGB(i,j); //the ARGB integer has the colors of pixel (i,j)
-      r = r+(int)(255&(pixel>>16)); //add up reds
-      g = g+(int)(255&(pixel>>8)); //add up greens
-      b = b+(int)(255&(pixel)); //add up blues
-    }
+  // Now loop throught he pixel data all at once
+  float r = 0, g = 0, b = 0;
+  final int[] pixels = ((DataBufferInt) screenshot.getRaster().getDataBuffer()).getData();
+  for (int i = 0; i < pixels.length; i++) {
+    r = r+(int)(255&(pixels[i]>>16)); // Add up reds
+    g = g+(int)(255&(pixels[i]>>8)); // Add up greens
+    b = b+(int)(255&(pixels[i])); // Add up blues
   }
   
-  r = r/((WIDTH/2)*(HEIGHT/2)); //average red (skipping every alternate pixel)
-  g = g/((WIDTH/2)*(HEIGHT/2)); //average green
-  b = b/((WIDTH/2)*(HEIGHT/2)); //average blue
+  // Write the data to the port
+  port.write(0xff); // Write marker (0xff) for synchronization
+  port.write((byte)(r)); // Write red value
+  port.write((byte)(g)); // Write green value
+  port.write((byte)(b)); // Write blue value
+   
+  // Average the values
+  r /= area; // Average red
+  g /= area; // Average green
+  b /= area; // Average blue
   
+  background(r, g, b); // Make window background average color
   
-  port.write(0xff); //write marker (0xff) for synchronization
-  port.write((byte)(r)); //write red value
-  port.write((byte)(g)); //write green value
-  port.write((byte)(b)); //write blue value
-  
-  background(r,g,b); //make window background average color
+  // 10ms delay for improved performance
+  delay(10);
 }
