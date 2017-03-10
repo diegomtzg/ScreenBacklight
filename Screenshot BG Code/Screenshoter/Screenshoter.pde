@@ -23,9 +23,27 @@ int area = WIDTH * HEIGHT;
 
 void setup()
 {
-  // TODO: Make this more dynamic (depends on the hardware COM port right now)
-  String portName = Serial.list()[1];
-  port = new Serial(this, portName, 9600); // Set baud rate
+  // Exit as this is a fatal error
+  String[] list = Serial.list();
+  if(list.length <= 0) {
+    println("Failed to receive a serial port"); 
+    exit();
+  }
+  String portName; 
+  for(int i = 0; i < list.length; i++) {
+    try {
+      portName = list[i];
+      port = new Serial(this, portName, 9600); // Set baud rate
+      if(port != null) {
+        break;
+      }
+    }
+    catch (Throwable err) {
+      println("Error opening port");
+      exit();
+    }
+  }
+  
   size(100, 100); // Sindow size (doesn't matter)
   try 
   {
@@ -52,11 +70,13 @@ void draw()
     b = b+(int)(255&(pixels[i])); // Add up blues
   }
   
+  /*
   // Write the data to the port
   port.write(0xff); // Write marker (0xff) for synchronization
   port.write((byte)(r)); // Write red value
   port.write((byte)(g)); // Write green value
   port.write((byte)(b)); // Write blue value
+  */
    
   // Average the values
   r /= area; // Average red
