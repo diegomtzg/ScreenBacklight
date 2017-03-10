@@ -70,13 +70,11 @@ void draw()
     b = b+(int)(255&(pixels[i])); // Add up blues
   }
   
-  /*
   // Write the data to the port
   port.write(0xff); // Write marker (0xff) for synchronization
   port.write((byte)(r)); // Write red value
   port.write((byte)(g)); // Write green value
   port.write((byte)(b)); // Write blue value
-  */
    
   // Average the values
   r /= area; // Average red
