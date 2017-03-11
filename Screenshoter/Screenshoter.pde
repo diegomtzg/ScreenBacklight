@@ -62,27 +62,24 @@ void draw()
   screenshot = robby.createScreenCapture(rec);
 
   // Now loop throught he pixel data all at once
-  float r = 0, g = 0, b = 0;
+  int r = 0, g = 0, b = 0;
   final int[] pixels = ((DataBufferInt) screenshot.getRaster().getDataBuffer()).getData();
   for (int i = 0; i < pixels.length; i++) {
-    r = r+(int)(255&(pixels[i]>>16)); // Add up reds
-    g = g+(int)(255&(pixels[i]>>8)); // Add up greens
-    b = b+(int)(255&(pixels[i])); // Add up blues
+    r += (int)(255&(pixels[i]>>16)); // Add up reds
+    g += (int)(255&(pixels[i]>>8)); // Add up greens
+    b += (int)(255&(pixels[i])); // Add up blues
   }
+  
+  // Average the values
+  r /= area; // Average red
+  g /= area; // Average green
+  b /= area; // Average blue
   
   // Write the data to the port
   port.write(0xff); // Write marker (0xff) for synchronization
   port.write((byte)(r)); // Write red value
   port.write((byte)(g)); // Write green value
   port.write((byte)(b)); // Write blue value
-   
-  // Average the values
-  r /= area; // Average red
-  g /= area; // Average green
-  b /= area; // Average blue
   
   background(r, g, b); // Make window background average color
-  
-  // 10ms delay for improved performance
-  delay(10);
 }
