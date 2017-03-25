@@ -7,11 +7,15 @@ import java.awt.Rectangle;
 import java.awt.Dimension;
 import processing.serial.*;
 
-Serial port; // Creates object "port" of serial class
-Robot robby; // Creates object "robby" of robot class
+// Creates object "port" of serial class
+Serial port; 
+// Creates object "robby" of robot class
+Robot robby; 
 
-final int WIDTH = 1368; // Screen width in pixels
-final int HEIGHT = 928; // Screen height in pixels
+// Screen width in pixels
+final int WIDTH = 1368; 
+// Screen height in pixels
+final int HEIGHT = 928; 
 
 // We only need to create these objects once
 Dimension dim = new Dimension(WIDTH, HEIGHT);
@@ -23,28 +27,34 @@ int area = WIDTH * HEIGHT;
 
 void setup()
 {
-  // Exit as this is a fatal error
   String[] list = Serial.list();
-  if(list.length <= 0) {
+  // Exit as this is a fatal error
+  if (list.length <= 0) {
     println("Failed to receive a serial port"); 
     exit();
   }
-  String portName; 
+  // Show us the ports that have been found
   for(int i = 0; i < list.length; i++) {
+     println(list[i]); 
+  }
+  // And then find the active serial port 
+  String portName; 
+  for (int i = 0; i < list.length; i++) {
     try {
       portName = list[i];
       port = new Serial(this, portName, 9600); // Set baud rate
-      if(port != null) {
+      if (port != null) {
         break;
       }
     }
     catch (Throwable err) {
-      println("Error opening port");
+      println("Error opening port: " + err);
       exit();
     }
   }
-  
-  size(100, 100); // Sindow size (doesn't matter)
+
+  // Sindow size (doesn't matter)
+  size(100, 100); 
   try 
   {
     robby = new Robot();
@@ -69,17 +79,23 @@ void draw()
     g += (int)(255&(pixels[i]>>8)); // Add up greens
     b += (int)(255&(pixels[i])); // Add up blues
   }
-  
+
   // Average the values
   r /= area; // Average red
   g /= area; // Average green
   b /= area; // Average blue
-  
+
   // Write the data to the port
   port.write(0xff); // Write marker (0xff) for synchronization
   port.write((byte)(r)); // Write red value
   port.write((byte)(g)); // Write green value
   port.write((byte)(b)); // Write blue value
   
-  background(r, g, b); // Make window background average color
+  // Make window background average color
+  background(r, g, b); 
+  
+  // Wait for the Arduino to say it's ready before taking another screenshot
+  while(port.read() != 'R') {
+    delay(10);  
+  }
 }
