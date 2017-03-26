@@ -137,6 +137,7 @@ void mode0()
     analogWrite(REDPIN, red);
     analogWrite(GREENPIN, green);
     analogWrite(BLUEPIN, blue);
+    Serial.write('R');
   }
   nextstate1: state++;
 }
