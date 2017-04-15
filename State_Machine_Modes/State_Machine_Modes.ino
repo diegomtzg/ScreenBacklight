@@ -13,13 +13,20 @@ LiquidCrystal lcd(3, 4, 5, 6, 7, 8);
 
 int state = 0;
 int red = 0;
-int blue = 0;
 int green = 0;
+int blue = 0;
 
-int queueItems = 10;
+int queueItems = 20;
 QueueArray <int> queue;
 int sum = 0;
 int initValues = 10;
+
+typedef struct listNode_ {
+  int redVal;
+  int greenVal;
+  int blueVal;
+  struct listNode_* next;
+} listNode;
 
 void setup() 
 {
@@ -46,8 +53,62 @@ void loop()
     joystick();
   }
   else if(state == 3) {
-    partyMusic();
+    listNode* newList = createColorList();
+    partyMusic(newList);
+    destroyList(&newList);
   }
+}
+
+listNode* createColorList() {
+  int numColors = 8; // Red, orange, yellow, green, light blue, blue, purple, pink
+  
+  listNode* red = malloc(sizeof(*red));
+  listNode* orange = malloc(sizeof(*orange));
+  listNode* yellow = malloc(sizeof(*yellow));
+  listNode* green = malloc(sizeof(*green));
+  listNode* lblue = malloc(sizeof(*lblue));
+  listNode* blue = malloc(sizeof(*blue));
+  listNode* purple = malloc(sizeof(*purple));
+  listNode* pink = malloc(sizeof(*pink));
+  
+  red->next = orange;
+  orange->next=yellow;
+  yellow->next = green;
+  green->next = lblue;
+  lblue->next = blue;
+  blue->next = purple;
+  purple->next = pink;
+  pink->next = red; // Circularly linked
+  
+  fillNodeColors(red, 255, 0 ,0);
+  fillNodeColors(orange, 255, 127 ,0);
+  fillNodeColors(yellow, 255, 255 ,0);
+  fillNodeColors(green, 0, 255 ,0);
+  fillNodeColors(lblue, 0, 110 ,255);
+  fillNodeColors(blue, 0, 0 ,255);
+  fillNodeColors(purple, 127, 0 ,255);
+  fillNodeColors(pink, 255, 0 ,200);
+
+  return red; // Arbitrary since circularly linked
+}
+
+void fillNodeColors(listNode* node, int r, int g, int b) {
+  node->redVal = r;
+  node->greenVal = g;
+  node->blueVal = b;
+}
+
+void destroyList(listNode** head) {
+  listNode* currNode = *head;
+  listNode* tmp = currNode;
+  
+  for(int i = 0; i < 8; i++) {
+    tmp = currNode;
+    currNode = currNode->next;
+    free(tmp);
+  }
+
+  *head = NULL;
 }
 
 bool buttonIsPressed(int buttonPin) //pressed but not held
@@ -363,7 +424,7 @@ void joystick()
   state++;
 }
 
-void partyMusic() {
+void partyMusic(listNode* colorList) {
   const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
   unsigned int sample;
   pinMode(A5, INPUT);
@@ -399,22 +460,21 @@ void partyMusic() {
    sum = sum - value + peakToPeak;
    queue.enqueue(peakToPeak);
    average = sum / queueItems;
+   float weightedAvg = average;
+   if(average < 30) {
+      weightedAvg = weightedAvg * 1.5;
+   }
    Serial.print(peakToPeak);
    Serial.print("    ");
-   Serial.println(average);
+   Serial.println(weightedAvg);
 
-   if(peakToPeak > average) {
-      if(count % 2 == 0)
+   if(peakToPeak > weightedAvg) {
+      if(count % 3 == 0)
       {
-        analogWrite(REDPIN, 255);
-        analogWrite(GREENPIN, 0);
-        analogWrite(BLUEPIN, 0);
-      }
-      else 
-      {
-        analogWrite(REDPIN, 0);
-        analogWrite(GREENPIN, 0);
-        analogWrite(BLUEPIN, 255);
+        analogWrite(REDPIN, colorList->redVal);
+        analogWrite(GREENPIN, colorList->greenVal);
+        analogWrite(BLUEPIN, colorList->blueVal);
+        colorList = colorList->next;
       }
       count++;
    }
