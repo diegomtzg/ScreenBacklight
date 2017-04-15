@@ -225,6 +225,9 @@ void mode1()
 
 void mode2()
 {
+  lcd.setCursor(0, 0);
+  lcd.print("3: Joystick");
+  
   float scale = 255.0/1024;
   int xpin = A1;    // select the input pin for the potentiometer
   int ypin = A0;
