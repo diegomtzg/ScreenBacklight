@@ -58,9 +58,7 @@ bool buttonIsPressed(int buttonPin) //pressed but not held
 }
 
 bool checkSignal()
-{
-      //TODO: EXIT OUT OF THESE LOOPS WHEN BUTTON IS PRESSED
-      
+{      
       if(Serial.available() == 0) // not connected to computer
       { 
         lcd.setCursor(0, 1);
@@ -74,8 +72,14 @@ bool checkSignal()
           {
             return false;
           }
-          delay(1000);
-          
+          for(int i = 0; i < 31000; i++) // Delay while checking if button is pressed (to be able to change state without having to wait)
+          {
+            if(buttonIsPressed(PUSHBUTTON_PIN))
+             {
+                return false;
+             }
+          }
+          delay(100);
           if(Serial.available() != 0) 
           {
             lcd.clear();
@@ -223,8 +227,6 @@ void mode2()
   
   while(!buttonIsPressed(PUSHBUTTON_PIN))
   {
-    lcd.setCursor(0, 0);
-    lcd.print("3: Joystick");
     X = analogRead(ypin);
     Y = analogRead(xpin);
     Z = digitalRead(pushpin);
@@ -233,7 +235,14 @@ void mode2()
     Y = ((float) Y * scale);
     Z = !Z; // Joystick switch is asserted when not pushed
 
+    // LCD displays rough estimate of color
+
     if(Z) {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("3: Joystick");
+        lcd.setCursor(0, 1);
+        lcd.print("    OFF");
         analogWrite(REDPIN, 0);
         analogWrite(GREENPIN, 0);
         analogWrite(BLUEPIN, 0);
@@ -241,6 +250,11 @@ void mode2()
     else {
       if(X < 10) // magenta to blue
       {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("3: Joystick");
+          lcd.setCursor(0, 1);
+          lcd.print(" BLUE-PINK");
           analogWrite(REDPIN, Y);
           analogWrite(GREENPIN, 0);
           analogWrite(BLUEPIN, 255);
@@ -249,12 +263,22 @@ void mode2()
       {
         if(X < 125) // from blue to cyan
         {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("3: Joystick");
+          lcd.setCursor(0, 1);
+          lcd.print(" BLUE-PINK");
           analogWrite(REDPIN, 0);
           analogWrite(GREENPIN, 2*X);
           analogWrite(BLUEPIN, 255);
         }
         else // from cyan to green
         {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("3: Joystick");
+          lcd.setCursor(0, 1);
+          lcd.print("GREEN-BLUE");
           analogWrite(REDPIN, 0);
           analogWrite(GREENPIN, 255);
           analogWrite(BLUEPIN, 255 - X);
@@ -264,6 +288,11 @@ void mode2()
       {
         if(Y < 255) // from magenta to blue
         {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("3: Joystick");
+          lcd.setCursor(0, 1);
+          lcd.print(" GREEN-YELLOW");
           analogWrite(REDPIN, Y);
           analogWrite(GREENPIN, 255);
           analogWrite(BLUEPIN, 0);
@@ -273,31 +302,37 @@ void mode2()
       {
         if(X > 119) // right half of top third
         {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("3: Joystick");
+          lcd.setCursor(0, 1);
+          lcd.print(" RED-YELLOW");
           analogWrite(REDPIN, 255);
           analogWrite(GREENPIN, (X - 120)*2);   
           analogWrite(BLUEPIN, 0);
         }
         else
         {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("3: Joystick");
+          lcd.setCursor(0, 1);
+          lcd.print(" PINK-RED");
           analogWrite(REDPIN, 255);
           analogWrite(GREENPIN, 0);
           analogWrite(BLUEPIN, 255 - 2*X);
         }
       }
     } 
-    
+    delay(10);
+
+    // Serial monitor values for debugging purposes
     Serial.print(X);
     Serial.print("     ");
-    Serial.println(Y);
-    lcd.setCursor(0, 1);
-    lcd.print("X:");
-    lcd.print(X);
-    lcd.print(" Y:");
-    lcd.print(Y);
-    lcd.print(" Z:");
-    lcd.print(Z);
-    delay(10);
-    lcd.clear();
+    Serial.print(Y);
+    Serial.print("     ");
+    Serial.println(Z);
+
   } 
   state = 0;
 }
