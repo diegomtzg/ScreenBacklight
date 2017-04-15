@@ -1,4 +1,4 @@
-import java.awt.Robot; //<>//
+import java.awt.Robot; //<>// //<>//
 import java.awt.AWTException;
 import java.awt.event.InputEvent;
 import java.awt.image.DataBufferInt;
@@ -104,10 +104,7 @@ void draw()
   background(r, g, b); 
   
   // Wait for the Arduino to say it's ready before taking another screenshot
-<<<<<<< HEAD
-=======
   // (BLE only)
->>>>>>> 7ae2340c3dfe74ee0a5672cddd7373b082d58057
   //while(port.read() != 'R') {
     //delay(10);  
   //}
