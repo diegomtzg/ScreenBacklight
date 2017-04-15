@@ -16,7 +16,7 @@ int red = 0;
 int green = 0;
 int blue = 0;
 
-int queueItems = 20;
+int queueItems = 10; // Change this to make system less sensitive to music beats
 QueueArray <int> queue;
 int sum = 0;
 int initValues = 10;
@@ -424,7 +424,11 @@ void joystick()
   state++;
 }
 
-void partyMusic(listNode* colorList) {
+void partyMusic(listNode* colorList) 
+{
+  lcd.setCursor(0, 0);
+  lcd.print("4: Party Mode");
+  
   const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
   unsigned int sample;
   pinMode(A5, INPUT);
@@ -461,15 +465,18 @@ void partyMusic(listNode* colorList) {
    queue.enqueue(peakToPeak);
    average = sum / queueItems;
    float weightedAvg = average;
-   if(average < 30) {
-      weightedAvg = weightedAvg * 1.5;
+   if(average < 15) {
+      weightedAvg = weightedAvg * 1.6;
+   }
+   else {
+      weightedAvg = weightedAvg * 1.2; // When noise is very low, make less sensitive to other (background) noises
    }
    Serial.print(peakToPeak);
    Serial.print("    ");
-   Serial.println(weightedAvg);
+   Serial.println(average);
 
    if(peakToPeak > weightedAvg) {
-      if(count % 3 == 0)
+      if(count % 2 == 0) // Skip one iteration so that beat doesn't change colors twice
       {
         analogWrite(REDPIN, colorList->redVal);
         analogWrite(GREENPIN, colorList->greenVal);
