@@ -42,18 +42,9 @@ void setup()
   for (int i = 0; i < list.length; i++) {
     try {
       portName = list[i];
-<<<<<<< HEAD
-      if(portName.toLowerCase().contains("usbmodem")) {
-        println("port:");
-        println(portName);
-=======
-      // If we find a com port, connect immediatly
-      if(portName.toLowerCase().contains("usbmodem") || portName.toLowerCase().contains("com")) {
->>>>>>> 7ae2340c3dfe74ee0a5672cddd7373b082d58057
-        port = new Serial(this, portName, 9600); // Set baud rate
-        if (port != null) {
-          break;
-        }
+      port = new Serial(this, portName, 9600); // Set baud rate
+      if (port != null) {
+        break;
       }
     }
     catch (Throwable err) {
@@ -104,11 +95,7 @@ void draw()
   background(r, g, b); 
   
   // Wait for the Arduino to say it's ready before taking another screenshot
-<<<<<<< HEAD
-=======
-  // (BLE only)
->>>>>>> 7ae2340c3dfe74ee0a5672cddd7373b082d58057
-  //while(port.read() != 'R') {
-    //delay(10);  
-  //}
+  while(port.read() != 'R') {
+    delay(10);  
+  }
 }
