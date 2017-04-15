@@ -118,7 +118,7 @@ void mode0()
 {
     lcd.setCursor(0, 0);
     lcd.print("1: BG Lighting");
-
+    
     if(checkSignal() == false)
       goto nextstate1;
 
@@ -142,6 +142,18 @@ void mode0()
     analogWrite(GREENPIN, green);
     analogWrite(BLUEPIN, blue);
     Serial.write('R');
+
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("1: BG Lighting");
+    lcd.setCursor(0,1);
+    lcd.print("R:");
+    lcd.print(red);
+    lcd.print(" G:");
+    lcd.print(green);
+    lcd.print(" B:");
+    lcd.print(blue);
+   
   }
   nextstate1: state++;
 }
