@@ -1,4 +1,6 @@
+#include <QueueArray.h>
 #include <LiquidCrystal.h>
+
 #define GREENPIN 11
 #define REDPIN 10
 #define BLUEPIN 9
@@ -14,6 +16,11 @@ int red = 0;
 int blue = 0;
 int green = 0;
 
+int queueItems = 10;
+QueueArray <int> queue;
+int sum = 0;
+int initValues = 10;
+
 void setup() 
 {
   lcd.begin(16, 2);
@@ -21,21 +28,25 @@ void setup()
   pinMode(JOYSTICK_BUTTON_PIN, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
+  for(int i = 0; i < queueItems; i++) {
+    queue.enqueue(initValues);
+    sum = sum + initValues;
+  }
 }
 
 void loop() 
 {
-  if(state == 0) // mode 0
-  {
-    mode0();
+  if(state == 0) {
+    bgLighting();
   }
-  else if(state == 1) // mode 1
-  {
-    mode1();
+  else if(state == 1) {
+    colorSwirl();
   }
-  else if(state == 2)
-  {
-    mode2();
+  else if(state == 2) {
+    joystick();
+  }
+  else if(state == 3) {
+    partyMusic();
   }
 }
 
@@ -114,7 +125,7 @@ bool checkSignal()
       return true;
 }
 
-void mode0()
+void bgLighting()
 {
     lcd.setCursor(0, 0);
     lcd.print("1: BG Lighting");
@@ -158,7 +169,7 @@ void mode0()
   nextstate1: state++;
 }
 
-void mode1()
+void colorSwirl()
 {
   int FADESPEED = 5;
   while(!buttonIsPressed(PUSHBUTTON_PIN))
@@ -223,7 +234,7 @@ void mode1()
   exitfunction: state++;
 }
 
-void mode2()
+void joystick()
 {
   lcd.setCursor(0, 0);
   lcd.print("3: Joystick");
@@ -349,5 +360,67 @@ void mode2()
     Serial.println(Z);
 
   } 
+  state++;
+}
+
+void partyMusic() {
+  const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
+  unsigned int sample;
+  pinMode(A5, INPUT);
+  int average = sum / queueItems;
+  int count = 0;
+  
+  while(!buttonIsPressed(PUSHBUTTON_PIN)) {
+    unsigned long startMillis= millis();  // Start of sample window
+    unsigned int peakToPeak = 0;   // peak-to-peak level
+    unsigned int signalMax = 0;
+    unsigned int signalMin = 1024;
+    
+   // Collect data for 50 mS
+   while (millis() - startMillis < sampleWindow)
+   {
+      sample = analogRead(A5);
+      if (sample < 1024)  // toss out spurious readings
+      {
+         if (sample > signalMax)
+         {
+            signalMax = sample;  // save just the max levels
+         }
+         else if (sample < signalMin)
+         {
+            signalMin = sample;  // save just the min levels
+         }
+      }
+   }
+   
+   peakToPeak = signalMax - signalMin;  // Peak to peak amplitude
+
+   int value = queue.dequeue();
+   sum = sum - value + peakToPeak;
+   queue.enqueue(peakToPeak);
+   average = sum / queueItems;
+   Serial.print(peakToPeak);
+   Serial.print("    ");
+   Serial.println(average);
+
+   if(peakToPeak > average) {
+      if(count % 2 == 0)
+      {
+        analogWrite(REDPIN, 255);
+        analogWrite(GREENPIN, 0);
+        analogWrite(BLUEPIN, 0);
+      }
+      else 
+      {
+        analogWrite(REDPIN, 0);
+        analogWrite(GREENPIN, 0);
+        analogWrite(BLUEPIN, 255);
+      }
+      count++;
+   }
+
+   
+  }
   state = 0;
 }
+
