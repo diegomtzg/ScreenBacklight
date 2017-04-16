@@ -16,7 +16,7 @@ int red = 0;
 int green = 0;
 int blue = 0;
 
-int queueItems = 10; // Change this to make system less sensitive to music beats
+int queueItems = 50; // Change this to make system less sensitive to music beats
 QueueArray <int> queue;
 int sum = 0;
 int initValues = 10;
@@ -131,7 +131,7 @@ bool buttonIsPressed(int buttonPin) //pressed but not held
 
 bool checkSignal()
 {      
-      if(Serial.available() == 0) // not connected to computer
+      if(Serial.available() == 0) // Not connected to computer
       { 
         lcd.setCursor(0, 1);
         lcd.print("No signal");
@@ -303,7 +303,7 @@ void joystick()
   float scale = 255.0/1024;
   int xpin = A1;    // select the input pin for the potentiometer
   int ypin = A0;
-  int pushpin = 13;
+  int pushpin = JOYSTICK_BUTTON_PIN;
   pinMode(xpin, INPUT);
   pinMode(ypin, INPUT);
   pinMode(pushpin, INPUT);
@@ -414,11 +414,11 @@ void joystick()
     delay(10);
 
     // Serial monitor values for debugging purposes
-    Serial.print(X);
-    Serial.print("     ");
-    Serial.print(Y);
-    Serial.print("     ");
-    Serial.println(Z);
+//    Serial.print(X);
+//    Serial.print("     ");
+//    Serial.print(Y);
+//    Serial.print("     ");
+//    Serial.println(Z);
 
   } 
   state++;
@@ -471,19 +471,16 @@ void partyMusic(listNode* colorList)
    else {
       weightedAvg = weightedAvg * 1.2; // When noise is very low, make less sensitive to other (background) noises
    }
-   Serial.print(peakToPeak);
-   Serial.print("    ");
-   Serial.println(average);
+   
 
    if(peakToPeak > weightedAvg) {
-      if(count % 2 == 0) // Skip one iteration so that beat doesn't change colors twice
-      {
-        analogWrite(REDPIN, colorList->redVal);
-        analogWrite(GREENPIN, colorList->greenVal);
-        analogWrite(BLUEPIN, colorList->blueVal);
-        colorList = colorList->next;
-      }
-      count++;
+      Serial.print(peakToPeak);
+      Serial.print("    ");
+      Serial.println(weightedAvg);
+      analogWrite(REDPIN, colorList->redVal);
+      analogWrite(GREENPIN, colorList->greenVal);
+      analogWrite(BLUEPIN, colorList->blueVal);
+      colorList = colorList->next;
    }
 
    
