@@ -189,7 +189,7 @@ bool checkSignal()
 void bgLighting()
 {
     lcd.setCursor(0, 0);
-    lcd.print("1: BG Lighting");
+    lcd.print("BG Lighting");
     
     if(checkSignal() == false)
       goto nextstate1;
@@ -198,7 +198,7 @@ void bgLighting()
     while(!buttonIsPressed(PUSHBUTTON_PIN))
     { 
     lcd.setCursor(0, 0);
-    lcd.print("1: BG Lighting");
+    lcd.print("   BG Lighting");
     //protocol expects data in format of 4 bytes
     //(xff) as a marker to ensure proper synchronization always
     //followed by red, green, blue bytes
@@ -217,13 +217,12 @@ void bgLighting()
 
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("1: BG Lighting");
-    lcd.setCursor(0,1);
-    lcd.print("R:");
+    lcd.print("   BG Lighting");
+    lcd.setCursor(3,1);
     lcd.print(red);
-    lcd.print(" G:");
+    lcd.print(" ");
     lcd.print(green);
-    lcd.print(" B:");
+    lcd.print(" ");
     lcd.print(blue);
    
   }
@@ -237,7 +236,7 @@ void colorSwirl()
   {
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("2:   Color");
+    lcd.print("     Color");
     lcd.setCursor(5, 1);
     lcd.print("Swirl");
       int r = 0;
@@ -298,7 +297,9 @@ void colorSwirl()
 void joystick()
 {
   lcd.setCursor(0, 0);
-  lcd.print("3: Joystick");
+  lcd.print("   Joystick");
+  lcd.setCursor(0, 1);
+  lcd.print("      OFF");
   
   float scale = 255.0/1024;
   int xpin = A1;    // select the input pin for the potentiometer
@@ -327,9 +328,9 @@ void joystick()
     if(Z) {
         lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.print("3: Joystick");
+        lcd.print("   Joystick");
         lcd.setCursor(0, 1);
-        lcd.print("    OFF");
+        lcd.print("      OFF");
         analogWrite(REDPIN, 0);
         analogWrite(GREENPIN, 0);
         analogWrite(BLUEPIN, 0);
@@ -339,9 +340,9 @@ void joystick()
       {
           lcd.clear();
           lcd.setCursor(0, 0);
-          lcd.print("3: Joystick");
+          lcd.print("   Joystick");
           lcd.setCursor(0, 1);
-          lcd.print(" BLUE-PINK");
+          lcd.print("   BLUE-PINK");
           analogWrite(REDPIN, Y);
           analogWrite(GREENPIN, 0);
           analogWrite(BLUEPIN, 255);
@@ -352,9 +353,9 @@ void joystick()
         {
           lcd.clear();
           lcd.setCursor(0, 0);
-          lcd.print("3: Joystick");
+          lcd.print("   Joystick");
           lcd.setCursor(0, 1);
-          lcd.print(" BLUE-PINK");
+          lcd.print("   BLUE-PINK");
           analogWrite(REDPIN, 0);
           analogWrite(GREENPIN, 2*X);
           analogWrite(BLUEPIN, 255);
@@ -363,9 +364,9 @@ void joystick()
         {
           lcd.clear();
           lcd.setCursor(0, 0);
-          lcd.print("3: Joystick");
+          lcd.print("   Joystick");
           lcd.setCursor(0, 1);
-          lcd.print("GREEN-BLUE");
+          lcd.print("  GREEN-BLUE");
           analogWrite(REDPIN, 0);
           analogWrite(GREENPIN, 255);
           analogWrite(BLUEPIN, 255 - X);
@@ -377,7 +378,7 @@ void joystick()
         {
           lcd.clear();
           lcd.setCursor(0, 0);
-          lcd.print("3: Joystick");
+          lcd.print("   Joystick");
           lcd.setCursor(0, 1);
           lcd.print(" GREEN-YELLOW");
           analogWrite(REDPIN, Y);
@@ -391,9 +392,9 @@ void joystick()
         {
           lcd.clear();
           lcd.setCursor(0, 0);
-          lcd.print("3: Joystick");
+          lcd.print("   Joystick");
           lcd.setCursor(0, 1);
-          lcd.print(" RED-YELLOW");
+          lcd.print("  RED-YELLOW");
           analogWrite(REDPIN, 255);
           analogWrite(GREENPIN, (X - 120)*2);   
           analogWrite(BLUEPIN, 0);
@@ -402,9 +403,9 @@ void joystick()
         {
           lcd.clear();
           lcd.setCursor(0, 0);
-          lcd.print("3: Joystick");
+          lcd.print("   Joystick");
           lcd.setCursor(0, 1);
-          lcd.print(" PINK-RED");
+          lcd.print("   PINK-RED");
           analogWrite(REDPIN, 255);
           analogWrite(GREENPIN, 0);
           analogWrite(BLUEPIN, 255 - 2*X);
@@ -427,7 +428,7 @@ void joystick()
 void partyMusic(listNode* colorList) 
 {
   lcd.setCursor(0, 0);
-  lcd.print("4: Party Mode");
+  lcd.print("   Party Mode");
   
   const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
   unsigned int sample;

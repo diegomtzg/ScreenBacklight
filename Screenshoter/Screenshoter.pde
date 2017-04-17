@@ -35,7 +35,7 @@ void setup()
   }
   // Show us the ports that have been found
   for(int i = 0; i < list.length; i++) {
-     println(list[i]); 
+     println("Port " + i + " " + list[i]); 
   }
   // And then find the active serial port 
   String portName; 
@@ -43,9 +43,10 @@ void setup()
     try {
       portName = list[i];
       // If we find a com port, connect immediatly
-      if(portName.toLowerCase().contains("usbmodem") || portName.toLowerCase().contains("com")) {
+      if(portName.toLowerCase().contains("tty.usbmodem") || (portName.toLowerCase().contains("com") & !portName.toLowerCase().contains("/dev"))) {
         port = new Serial(this, portName, 9600); // Set baud rate
         if (port != null) {
+          println("Connected to: " + portName);
           break;
         }
       }
@@ -56,8 +57,8 @@ void setup()
     }
   }
 
-  // Sindow size (doesn't matter)
-  size(100, 100); 
+  // Window size (doesn't matter)
+  size(200, 200); 
   try 
   {
     robby = new Robot();
@@ -89,17 +90,13 @@ void draw()
   b /= area; // Average blue
 
   // Write the data to the port
-  port.write(0xff); // Write marker (0xff) for synchronization
-  port.write((byte)(r)); // Write red value
-  port.write((byte)(g)); // Write green value
-  port.write((byte)(b)); // Write blue value
+  if(port != null) {
+    port.write(0xff); // Write marker (0xff) for synchronization
+    port.write((byte)(r)); // Write red value
+    port.write((byte)(g)); // Write green value
+    port.write((byte)(b)); // Write blue value
+  }
   
   // Make window background average color
   background(r, g, b); 
-  
-  // Wait for the Arduino to say it's ready before taking another screenshot
-  // (BLE only)
-  //while(port.read() != 'R') {
-    //delay(10);  
-  //}
 }
