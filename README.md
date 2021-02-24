@@ -1,5 +1,7 @@
 # ScreenBacklight
 
+![](https://media.giphy.com/media/uuQ9tVx39JVF9ghhRT/giphy.gif)
+
 An arduino-based ambient lighting system with multiple modes of operation to enhance movie watching and music listening experiences.
 
 ## Modes
@@ -7,6 +9,3 @@ An arduino-based ambient lighting system with multiple modes of operation to enh
 * Party Mode: LED strip colors react to music.
 * Joystick Mode: Maps a joystick's position to a color wheel to choose a color to display on the LED strip.
 * Color Cycle: Cycles through colors with smooth transitions.
-
-### Screen Backlight Example
-![](https://media.giphy.com/media/uuQ9tVx39JVF9ghhRT/giphy.gif)
